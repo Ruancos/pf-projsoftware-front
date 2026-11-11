@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
 import './App.css'
 
-const healthUrl = 'http://3.239.255.80:8080/health'
+const healthUrl = '/api/health'
 
 function App() {
   const { loginWithRedirect, logout, isAuthenticated, isLoading, user } =

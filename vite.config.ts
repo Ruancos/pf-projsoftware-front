@@ -8,4 +8,12 @@ export default defineConfig({
     react(),
     babel({ presets: [reactCompilerPreset()] })
   ],
+  server: {
+    proxy: {
+      '/api/health': {
+        target: 'http://3.239.255.80:8080',
+        changeOrigin: true,
+      },
+    },
+  },
 })
