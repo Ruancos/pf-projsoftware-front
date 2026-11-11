@@ -1,139 +1,136 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
 import './App.css'
 
+const healthUrl = 'http://3.239.255.80:8080/health'
+
 function App() {
-  const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0()
-  const [count, setCount] = useState(0)
+  const { loginWithRedirect, logout, isAuthenticated, isLoading, user } =
+    useAuth0()
+  const [healthStatus, setHealthStatus] = useState<
+    'idle' | 'loading' | 'success' | 'error'
+  >('idle')
+  const [healthResponse, setHealthResponse] = useState('')
+
+  const checkHealth = async () => {
+    setHealthStatus('loading')
+    setHealthResponse('')
+
+    try {
+      const response = await fetch(healthUrl)
+      const body = await response.text()
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`)
+      }
+
+      setHealthResponse(body || 'API respondeu sem conteúdo.')
+      setHealthStatus('success')
+    } catch (error) {
+      setHealthResponse(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível conectar ao backend.',
+      )
+      setHealthStatus('error')
+    }
+  }
+
+  useEffect(() => {
+    if (!isAuthenticated) return
+
+    let active = true
+
+    fetch(healthUrl)
+      .then(async (response) => {
+        const body = await response.text()
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        if (active) {
+          setHealthResponse(body || 'API respondeu sem conteúdo.')
+          setHealthStatus('success')
+        }
+      })
+      .catch((error: unknown) => {
+        if (active) {
+          setHealthResponse(
+            error instanceof Error
+              ? error.message
+              : 'Não foi possível conectar ao backend.',
+          )
+          setHealthStatus('error')
+        }
+      })
+
+    return () => {
+      active = false
+    }
+  }, [isAuthenticated])
+
+  if (isLoading) {
+    return <main className="page-shell">Carregando...</main>
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <main className="page-shell">
+        <section className="auth-card">
+          <div className="brand-mark">PF</div>
+          <h1>Bem-vindo</h1>
+          <p>Entre para acessar a integração com o backend.</p>
+          <button className="primary-button" onClick={() => loginWithRedirect()}>
+            Entrar
+          </button>
+        </section>
+      </main>
+    )
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <main className="page-shell">
+      <section className="dashboard-card">
+        <header className="dashboard-header">
+          <div>
+            <span className="eyebrow">Área protegida</span>
+            <h1>Integração</h1>
+            <p>Olá, {user?.name ?? 'usuário'}.</p>
+          </div>
+          <button
+            className="secondary-button"
+            onClick={() =>
+              logout({ logoutParams: { returnTo: window.location.origin } })
+            }
+          >
+            Sair
+          </button>
+        </header>
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
+        <div className={`health-panel ${healthStatus}`}>
+          <div>
+            <span className="eyebrow">Teste do backend</span>
+            <h2>Health check</h2>
+            <p>
+              {healthStatus === 'loading'
+                ? 'Consultando a API...'
+                : healthStatus === 'success'
+                  ? 'Backend conectado com sucesso.'
+                  : healthStatus === 'error'
+                    ? `Falha na conexão: ${healthResponse}`
+                    : 'Verifique o status da API.'}
+            </p>
+            {healthStatus === 'success' && (
+              <code className="response">{healthResponse}</code>
+            )}
+          </div>
+          <button
+            className="primary-button"
+            onClick={() => void checkHealth()}
+            disabled={healthStatus === 'loading'}
+          >
+            {healthStatus === 'loading' ? 'Testando...' : 'Testar novamente'}
+          </button>
         </div>
       </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-      <main>
-        {isAuthenticated ? (
-          <>
-            <p>Olá, {user?.name}</p>
-            <button
-              onClick={() =>
-                logout({ logoutParams: { returnTo: window.location.origin } })
-              }
-            >
-              Sair
-            </button>
-          </>
-        ) : (
-          <button onClick={() => loginWithRedirect()}>Entrar</button>
-        )}
-      </main>
-    </>
+    </main>
   )
 }
 
