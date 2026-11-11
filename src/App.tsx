@@ -109,7 +109,7 @@ function App() {
         <header className="dashboard-header">
           <div>
             <span className="eyebrow">Área protegida</span>
-            <h1>Integração, Olá {user?.name ?? 'usuário'}</h1>
+            <h1>Olá {user?.name ?? 'usuário'}</h1>
           </div>
           <button
             className="secondary-button"
