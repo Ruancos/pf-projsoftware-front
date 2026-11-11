@@ -7,6 +7,10 @@
     {
       "source": "/api/tarefas",
       "destination": "http://3.239.255.80:8080/tarefas"
+    },
+    {
+      "source": "/api/tarefas/:id*",
+      "destination": "http://3.239.255.80:8080/tarefas/:id*"
     }
   ]
 }
