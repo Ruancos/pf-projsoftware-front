@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/health",
+      "destination": "http://3.239.255.80:8080/health"
+    }
+  ]
+}
