@@ -9,6 +9,10 @@ function getErrorMessage(error) {
         : 'Não foi possível concluir a operação.'
 }
 
+function getTarefaId(tarefa) {
+    return tarefa.id ?? tarefa.idTarefa ?? tarefa.tarefaId
+}
+
 export default function Tarefas() {
     const { user, isAuthenticated } = useAuth0()
     const [tarefas, setTarefas] = useState([])
@@ -100,11 +104,17 @@ export default function Tarefas() {
         }
     }
 
-    const handleDelete = async (id) => {
+    const handleDelete = async (tarefa) => {
         setErrorMessage('')
+        const id = getTarefaId(tarefa)
+
+        if (id === undefined || id === null || id === '') {
+            setErrorMessage('A API não retornou o ID desta tarefa para exclusão.')
+            return
+        }
 
         try {
-            const response = await fetch(`${tarefasUrl}/${id}`, {
+            const response = await fetch(`${tarefasUrl}/${encodeURIComponent(id)}`, {
                 method: 'DELETE',
             })
 
@@ -112,7 +122,9 @@ export default function Tarefas() {
                 throw new Error('Não foi possível excluir a tarefa.')
             }
 
-            setTarefas((prevTarefas) => prevTarefas.filter((tarefa) => tarefa.id !== id))
+            setTarefas((prevTarefas) => (
+                prevTarefas.filter((item) => getTarefaId(item) !== id)
+            ))
         } catch (error) {
             setErrorMessage(getErrorMessage(error))
         }
@@ -173,26 +185,39 @@ export default function Tarefas() {
                 ) : tarefas.length === 0 ? (
                     <p className="tasks-empty">Nenhuma tarefa cadastrada.</p>
                 ) : (
-                    tarefas.map((tarefa) => (
-                        <article className="task-item" key={tarefa.id}>
+                    tarefas.map((tarefa, index) => {
+                        const tarefaId = getTarefaId(tarefa)
+
+                        return (
+                        <article
+                            className="task-item"
+                            key={tarefaId ?? `${tarefa.nome}-${index}`}
+                        >
                             <div>
-                                <h3>{tarefa.titulo}</h3>
+                                <h3>{tarefa.nome ?? tarefa.titulo}</h3>
                                 {tarefa.descricao && <p>{tarefa.descricao}</p>}
                                 <div className="task-meta">
-                                    {tarefa.tipoPrioridade && (
-                                        <span>{tarefa.tipoPrioridade}</span>
+                                    {(tarefa.prioridade ?? tarefa.tipoPrioridade) && (
+                                        <span>{tarefa.prioridade ?? tarefa.tipoPrioridade}</span>
                                     )}
                                 </div>
                             </div>
                             <button
                                 className="delete-button"
                                 type="button"
-                                onClick={() => handleDelete(tarefa.id)}
+                                onClick={() => handleDelete(tarefa)}
+                                disabled={tarefaId === undefined || tarefaId === null}
+                                title={
+                                    tarefaId === undefined || tarefaId === null
+                                        ? 'A tarefa não possui ID'
+                                        : 'Excluir tarefa'
+                                }
                             >
                                 Excluir
                             </button>
                         </article>
-                    ))
+                        )
+                    })
                 )}
             </div>
         </section>
