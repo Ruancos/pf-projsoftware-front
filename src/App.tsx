@@ -3,6 +3,32 @@ import { useAuth0 } from '@auth0/auth0-react'
 import './App.css'
 
 const healthUrl = '/api/health'
+const healthTimeoutMs = 8000
+
+async function requestHealth(): Promise<string> {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), healthTimeoutMs)
+
+  try {
+    const response = await fetch(healthUrl, { signal: controller.signal })
+    const body = await response.text()
+
+    if (!response.ok) {
+      throw new Error(body || `HTTP ${response.status}`)
+    }
+
+    return body || 'API respondeu sem conteúdo.'
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw new Error('Tempo limite excedido ao consultar a API.', {
+        cause: error,
+      })
+    }
+    throw error
+  } finally {
+    clearTimeout(timeout)
+  }
+}
 
 function App() {
   const { loginWithRedirect, logout, isAuthenticated, isLoading, user } =
@@ -17,14 +43,7 @@ function App() {
     setHealthResponse('')
 
     try {
-      const response = await fetch(healthUrl)
-      const body = await response.text()
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`)
-      }
-
-      setHealthResponse(body || 'API respondeu sem conteúdo.')
+      setHealthResponse(await requestHealth())
       setHealthStatus('success')
     } catch (error) {
       setHealthResponse(
@@ -41,10 +60,8 @@ function App() {
 
     let active = true
 
-    fetch(healthUrl)
-      .then(async (response) => {
-        const body = await response.text()
-        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    requestHealth()
+      .then((body) => {
         if (active) {
           setHealthResponse(body || 'API respondeu sem conteúdo.')
           setHealthStatus('success')
