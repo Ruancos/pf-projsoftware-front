@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { useAuth0 } from '@auth0/auth0-react'
 import heroImg from './assets/hero.png'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import './App.css'
 
 function App() {
+  const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0()
   const [count, setCount] = useState(0)
 
   return (
@@ -115,6 +117,22 @@ function App() {
 
       <div className="ticks"></div>
       <section id="spacer"></section>
+      <main>
+        {isAuthenticated ? (
+          <>
+            <p>Olá, {user?.name}</p>
+            <button
+              onClick={() =>
+                logout({ logoutParams: { returnTo: window.location.origin } })
+              }
+            >
+              Sair
+            </button>
+          </>
+        ) : (
+          <button onClick={() => loginWithRedirect()}>Entrar</button>
+        )}
+      </main>
     </>
   )
 }
