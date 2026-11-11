@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
 import './App.css'
+import Tarefas from './components/Tarefas.jsx'
 
 const healthUrl = '/api/health'
 const healthTimeoutMs = 8000
@@ -146,8 +147,10 @@ function App() {
             {healthStatus === 'loading' ? 'Testando...' : 'Testar novamente'}
           </button>
         </div>
+        <div><Tarefas/></div>
       </section>
     </main>
+  
   )
 }
 
