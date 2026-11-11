@@ -142,6 +142,146 @@
   overflow-wrap: anywhere;
 }
 
+.tasks-panel {
+  margin-top: 24px;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--social-bg);
+  text-align: left;
+}
+
+.tasks-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.tasks-heading h2 {
+  margin-bottom: 0;
+}
+
+.task-count {
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: var(--accent);
+  background: var(--accent-bg);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.task-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.task-form label {
+  display: grid;
+  gap: 6px;
+  color: var(--text-h);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.task-form input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-h);
+  background: var(--bg);
+  font: inherit;
+  font-size: 14px;
+}
+
+.task-form input:focus {
+  outline: 2px solid var(--accent-border);
+  outline-offset: 1px;
+}
+
+.task-submit {
+  justify-self: start;
+  align-self: end;
+}
+
+.tasks-error {
+  margin: 16px 0 0;
+  color: #d93025;
+}
+
+.tasks-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.tasks-empty {
+  margin: 0;
+  color: var(--text);
+  text-align: center;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+}
+
+.task-item h3 {
+  margin: 0 0 4px;
+  color: var(--text-h);
+  font-size: 17px;
+}
+
+.task-item p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.task-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.task-meta span {
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: var(--text-h);
+  background: var(--accent-bg);
+  font-size: 12px;
+}
+
+.delete-button {
+  flex-shrink: 0;
+  padding: 8px 12px;
+  border: 1px solid #d93025;
+  border-radius: 8px;
+  color: #d93025;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+}
+
+.delete-button:hover {
+  color: white;
+  background: #d93025;
+}
+
 @media (max-width: 600px) {
   .auth-card,
   .dashboard-card {
@@ -157,5 +297,21 @@
   .secondary-button,
   .health-panel .primary-button {
     align-self: flex-start;
+  }
+
+  .tasks-heading,
+  .task-item {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .task-form {
+    grid-template-columns: 1fr;
+  }
+
+  .task-submit,
+  .delete-button {
+    justify-self: stretch;
+    width: 100%;
   }
 }
